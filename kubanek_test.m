@@ -9,11 +9,11 @@ load('subject_data.mat');
 dataflag = 3;
 
 if dataflag == 1
-    x = subject1trainingData;   % testing script with this data
+    x = subject1testingData;   % testing script with this data
 elseif dataflag == 2
-    x = subject2trainingData;
+    x = subject2testingData;
 else
-    x = subject3trainingData;
+    x = subject3testingData;
 end
 
 fs = 1000;  % 1000 Hz
@@ -49,21 +49,15 @@ for i = 1:numchannels
     FreqAvg160to175(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [160,175]);
 end
 
-%% Downsample dataglove
-
 if dataflag == 1
-    glove_data = subject1gloveData;
+    save('subject1_testfeatures.mat','TimeDomainAvg','FreqAvg5to15','FreqAvg20to25',...
+    'FreqAvg75to115','FreqAvg125to160','FreqAvg160to175');
 elseif dataflag == 2
-    glove_data = subject2gloveData;
+    save('subject2_testfeatures.mat','TimeDomainAvg','FreqAvg5to15','FreqAvg20to25',...
+    'FreqAvg75to115','FreqAvg125to160','FreqAvg160to175');
 else
-    glove_data = subject3gloveData;
-end
-
-downsampling_factor = 50;
-glove_length = 310000/downsampling_factor;
-downsampled_glove_data = zeros(glove_length,5);
-for i = 1:5
-    downsampled_glove_data(:,i) = decimate(glove_data(:,i),downsampling_factor);
+    save('subject3_testfeatures.mat','TimeDomainAvg','FreqAvg5to15','FreqAvg20to25',...
+    'FreqAvg75to115','FreqAvg125to160','FreqAvg160to175');
 end
 
 %% Linear regression
@@ -81,28 +75,27 @@ for i = 1:M-2
         reshape(FreqAvg160to175(i:i+N-1,1:numchannels),1,numchannels*N)];
 end
 
-Y = downsampled_glove_data(2:end,:);
-Beta = (X'*X)\(X'*Y);
+% Load correct Beta
+if dataflag == 1
+    load('subject1_BetaMatrix.mat');
+elseif dataflag == 2
+    load('subject2_BetaMatrix.mat');
+else
+    load('subject3_BetaMatrix.mat');
+end
 Y_hat = X*Beta;
 
-if dataflag == 1
-    save('subject1_BetaMatrix.mat','Beta');
-elseif dataflag == 2
-    save('subject2_BetaMatrix.mat','Beta');
-else
-    save('subject3_BetaMatrix.mat','Beta');
-end
 %% Spline Interpolation
 
-predict_Y = zeros(310000,5);
-x = 1:50:309950;
-xx = 1:309950;
+predict_Y = zeros(147500,5);
+x = 1:50:147450;
+xx = 1:147450;
 
 for i = 1:5
-    temp_values = zeros(310000,1);
+    temp_values = zeros(147500,1);
     
     % Values are integers from [-2 to 7], so round predicted values
-    temp_values(51:310000) = round(spline(x,Y_hat(:,i),xx));
+    temp_values(51:147500) = round(spline(x,Y_hat(:,i),xx));
     temp_values(temp_values < -2) = -2;
     temp_values(temp_values > 7) = 7;
     
@@ -111,8 +104,10 @@ for i = 1:5
     predict_Y(:,i) = temp_values;
 end
 
-% need to check predict_Y
-correct_matrix = ~logical(predict_Y - glove_data);
-percent_correct = mean(correct_matrix);
-
-% save('kubanek.mat','Beta');
+if dataflag == 1
+    save('predicted_1.mat','predict_Y');
+elseif dataflag == 2
+    save('predicted_2.mat','predict_Y');
+else
+    save('predicted_3.mat','predict_Y');
+end
