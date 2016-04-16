@@ -18,7 +18,7 @@ fs = 1000;
 winLen = 100e-3;    % 100 ms
 winDisp = 50e-3;    % 50 ms
 
-% X = BuildFeatures(trainingData, fs, winLen, winDisp, numChannels);
+X = BuildFeatures(trainingData, fs, winLen, winDisp, numChannels);
 
 %% Downsample dataglove
 
