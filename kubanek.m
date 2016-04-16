@@ -18,7 +18,7 @@ fs = 1000;
 winLen = 100e-3;    % 100 ms
 winDisp = 50e-3;    % 50 ms
 
-X = BuildFeatures(trainingData, fs, winLen, winDisp, numChannels);
+% X = BuildFeatures(trainingData, fs, winLen, winDisp, numChannels);
 
 %% Downsample dataglove
 
@@ -55,10 +55,12 @@ Y = Y(1:end-1,:);
 % Linear Regression
 Beta = (X' * X) \ (X' * Y);
 yHat =  X * Beta;
-yPredict = splineInterpolation(yHat);
+yPredict = splineInterpolation(yHat, 310000);
 
 %% Evaluate Model
 
 accuracy = evaluateModel(yPredict, gloveData)
 
-% save('kubanek.mat','Beta');
+%% Save Beta Matrix
+
+saveBetaMatrix(Beta,subjectID);
