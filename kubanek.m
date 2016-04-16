@@ -1,12 +1,12 @@
 %% Load data
-load('subject_data.mat');
+% load('subject_data.mat');
 
 %% Prefiltering
 
 % Set data flag to correspond to desired dataset
-% dataflag = 1;
+dataflag = 1;
 % dataflag = 2;
-dataflag = 3;
+% dataflag = 3;
 
 if dataflag == 1
     x = subject1trainingData;   % testing script with this data
@@ -20,9 +20,9 @@ fs = 1000;  % 1000 Hz
 numchannels = length(x(1,:));
 
 % Prefilter data
-for i = 1:numchannels
-    x(:,i) = apply_Kramer(x(:,i));
-end
+% for i = 1:numchannels
+%     x(:,i) = apply_Kramer(x(:,i));
+% end
 
 %% Feature Extraction
 % Define window length/displacement
@@ -72,16 +72,24 @@ end
 M = numwindows;
 N = 3;
 X = zeros(M,N*numchannels*6+1);
-for i = 1:M-2
-    X(i,:) = [1, reshape(TimeDomainAvg(i:i+N-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg5to15(i:i+N-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg20to25(i:i+N-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg75to115(i:i+N-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg125to160(i:i+N-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg160to175(i:i+N-1,1:numchannels),1,numchannels*N)];
+% for i = 1:M-2
+%     X(i,:) = [1, reshape(TimeDomainAvg(i:i+N-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg5to15(i:i+N-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg20to25(i:i+N-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg75to115(i:i+N-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg125to160(i:i+N-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg160to175(i:i+N-1,1:numchannels),1,numchannels*N)];
+% end
+for i = 4:M
+    X(i,:) = [1, reshape(TimeDomainAvg(i-N:i-1,1:numchannels),1,numchannels*N),...
+        reshape(FreqAvg5to15(i-N:i-1,1:numchannels),1,numchannels*N),...
+        reshape(FreqAvg20to25(i-N:i-1,1:numchannels),1,numchannels*N),...
+        reshape(FreqAvg75to115(i-N:i-1,1:numchannels),1,numchannels*N),...
+        reshape(FreqAvg125to160(i-N:i-1,1:numchannels),1,numchannels*N),...
+        reshape(FreqAvg160to175(i-N:i-1,1:numchannels),1,numchannels*N)];
 end
 
-Y = downsampled_glove_data(2:end,:);
+Y = downsampled_glove_data(1:end-1,:);
 Beta = (X'*X)\(X'*Y);
 Y_hat = X*Beta;
 
@@ -92,6 +100,13 @@ elseif dataflag == 2
 else
     save('subject3_BetaMatrix.mat','Beta');
 end
+
+%% Lasso
+
+% Generate models
+% [B1, fitinfo] = lasso(X,Y(:,1));
+
+
 %% Spline Interpolation
 
 predict_Y = zeros(310000,5);
@@ -103,16 +118,18 @@ for i = 1:5
     
     % Values are integers from [-2 to 7], so round predicted values
     temp_values(51:310000) = round(spline(x,Y_hat(:,i),xx));
+%     temp_values(1:end-50) = round(spline(x,Y_hat(:,i),xx));
     temp_values(temp_values < -2) = -2;
     temp_values(temp_values > 7) = 7;
     
     % Zero-pad the first 50 angles
     temp_values(1:50) = zeros(50,1);
+%     temp_values(end-49:end) = zeros(50,1);
     predict_Y(:,i) = temp_values;
 end
 
 % need to check predict_Y
 correct_matrix = ~logical(predict_Y - glove_data);
-percent_correct = mean(correct_matrix);
+percent_correct = mean(correct_matrix)
 
 % save('kubanek.mat','Beta');

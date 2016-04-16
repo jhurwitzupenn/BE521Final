@@ -1,12 +1,12 @@
 %% Load data
-load('subject_data.mat');
+% load('subject_data.mat');
 
 %% Prefiltering
 
 % Set data flag to correspond to desired dataset
-% dataflag = 1;
+dataflag = 1;
 % dataflag = 2;
-dataflag = 3;
+% dataflag = 3;
 
 if dataflag == 1
     x = subject1testingData;   % testing script with this data
@@ -20,9 +20,9 @@ fs = 1000;  % 1000 Hz
 numchannels = length(x(1,:));
 
 % Prefilter data
-for i = 1:numchannels
-    x(:,i) = apply_Kramer(x(:,i));
-end
+% for i = 1:numchannels
+%     x(:,i) = apply_Kramer(x(:,i));
+% end
 
 %% Feature Extraction
 % Define window length/displacement
@@ -66,13 +66,21 @@ end
 M = numwindows;
 N = 3;
 X = zeros(M,N*numchannels*6+1);
-for i = 1:M-2
-    X(i,:) = [1, reshape(TimeDomainAvg(i:i+N-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg5to15(i:i+N-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg20to25(i:i+N-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg75to115(i:i+N-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg125to160(i:i+N-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg160to175(i:i+N-1,1:numchannels),1,numchannels*N)];
+% for i = 1:M-2
+%     X(i,:) = [1, reshape(TimeDomainAvg(i:i+N-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg5to15(i:i+N-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg20to25(i:i+N-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg75to115(i:i+N-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg125to160(i:i+N-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg160to175(i:i+N-1,1:numchannels),1,numchannels*N)];
+% end
+for i = 4:M
+    X(i,:) = [1, reshape(TimeDomainAvg(i-N:i-1,1:numchannels),1,numchannels*N),...
+        reshape(FreqAvg5to15(i-N:i-1,1:numchannels),1,numchannels*N),...
+        reshape(FreqAvg20to25(i-N:i-1,1:numchannels),1,numchannels*N),...
+        reshape(FreqAvg75to115(i-N:i-1,1:numchannels),1,numchannels*N),...
+        reshape(FreqAvg125to160(i-N:i-1,1:numchannels),1,numchannels*N),...
+        reshape(FreqAvg160to175(i-N:i-1,1:numchannels),1,numchannels*N)];
 end
 
 % Load correct Beta
