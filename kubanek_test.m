@@ -40,26 +40,33 @@ FreqAvg125to160 = zeros(numwindows,numchannels);
 FreqAvg160to175 = zeros(numwindows,numchannels);
 
 % Extract features
-fprintf('Generating features\n');
-for i = 1:numchannels
-    TimeDomainAvg(:,i) = MovingWinFeats(x(:,i), fs, winLen, winDisp, TimeAvg);
-    FreqAvg5to15(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [5,15]);
-    FreqAvg20to25(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [20,25]);
-    FreqAvg75to115(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [75,115]);
-    FreqAvg125to160(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [125,160]);
-    FreqAvg160to175(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [160,175]);
-end
-fprintf('Generating features done\n');
-
+% fprintf('Generating features\n');
+% for i = 1:numchannels
+%     TimeDomainAvg(:,i) = MovingWinFeats(x(:,i), fs, winLen, winDisp, TimeAvg);
+%     FreqAvg5to15(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [5,15]);
+%     FreqAvg20to25(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [20,25]);
+%     FreqAvg75to115(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [75,115]);
+%     FreqAvg125to160(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [125,160]);
+%     FreqAvg160to175(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [160,175]);
+% end
+% fprintf('Generating features done\n');
+% 
+% if dataflag == 1
+%     save('subject1_testfeatures.mat','TimeDomainAvg','FreqAvg5to15','FreqAvg20to25',...
+%     'FreqAvg75to115','FreqAvg125to160','FreqAvg160to175');
+% elseif dataflag == 2
+%     save('subject2_testfeatures.mat','TimeDomainAvg','FreqAvg5to15','FreqAvg20to25',...
+%     'FreqAvg75to115','FreqAvg125to160','FreqAvg160to175');
+% else
+%     save('subject3_testfeatures.mat','TimeDomainAvg','FreqAvg5to15','FreqAvg20to25',...
+%     'FreqAvg75to115','FreqAvg125to160','FreqAvg160to175');
+% end
 if dataflag == 1
-    save('subject1_testfeatures.mat','TimeDomainAvg','FreqAvg5to15','FreqAvg20to25',...
-    'FreqAvg75to115','FreqAvg125to160','FreqAvg160to175');
+    load('subject1_testfeatures.mat');
 elseif dataflag == 2
-    save('subject2_testfeatures.mat','TimeDomainAvg','FreqAvg5to15','FreqAvg20to25',...
-    'FreqAvg75to115','FreqAvg125to160','FreqAvg160to175');
+    load('subject2_testfeatures.mat');
 else
-    save('subject3_testfeatures.mat','TimeDomainAvg','FreqAvg5to15','FreqAvg20to25',...
-    'FreqAvg75to115','FreqAvg125to160','FreqAvg160to175');
+    load('subject3_testfeatures.mat');
 end
 
 %% Linear regression
@@ -67,7 +74,8 @@ end
 % Construct X matrix
 M = numwindows;
 N = 3;
-X = zeros(M,N*numchannels*6+1);
+% X = zeros(M,N*numchannels*6+1);
+X = zeros(M,numchannels*6+1);
 % for i = 1:M-2
 %     X(i,:) = [1, reshape(TimeDomainAvg(i:i+N-1,1:numchannels),1,numchannels*N),...
 %         reshape(FreqAvg5to15(i:i+N-1,1:numchannels),1,numchannels*N),...
@@ -76,13 +84,21 @@ X = zeros(M,N*numchannels*6+1);
 %         reshape(FreqAvg125to160(i:i+N-1,1:numchannels),1,numchannels*N),...
 %         reshape(FreqAvg160to175(i:i+N-1,1:numchannels),1,numchannels*N)];
 % end
+% for i = 4:M
+%     X(i,:) = [1, reshape(TimeDomainAvg(i-N:i-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg5to15(i-N:i-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg20to25(i-N:i-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg75to115(i-N:i-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg125to160(i-N:i-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg160to175(i-N:i-1,1:numchannels),1,numchannels*N)];
+% end
 for i = 4:M
-    X(i,:) = [1, reshape(TimeDomainAvg(i-N:i-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg5to15(i-N:i-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg20to25(i-N:i-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg75to115(i-N:i-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg125to160(i-N:i-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg160to175(i-N:i-1,1:numchannels),1,numchannels*N)];
+    X(i,:) = [1, reshape(TimeDomainAvg(i-N,1:numchannels),1,numchannels),...
+        reshape(FreqAvg5to15(i-N,1:numchannels),1,numchannels),...
+        reshape(FreqAvg20to25(i-N,1:numchannels),1,numchannels),...
+        reshape(FreqAvg75to115(i-N,1:numchannels),1,numchannels),...
+        reshape(FreqAvg125to160(i-N,1:numchannels),1,numchannels),...
+        reshape(FreqAvg160to175(i-N,1:numchannels),1,numchannels)];
 end
 
 % Load correct Beta

@@ -4,9 +4,9 @@
 %% Prefiltering
 
 % Set data flag to correspond to desired dataset
-% dataflag = 1;
+dataflag = 1;
 % dataflag = 2;
-dataflag = 3;
+% dataflag = 3;
 
 if dataflag == 1
     x = subject1trainingData;   % testing script with this data
@@ -40,16 +40,34 @@ FreqAvg125to160 = zeros(numwindows,numchannels);
 FreqAvg160to175 = zeros(numwindows,numchannels);
 
 % Extract features
-fprintf('Generating features\n');
-for i = 1:numchannels
-    TimeDomainAvg(:,i) = MovingWinFeats(x(:,i), fs, winLen, winDisp, TimeAvg);
-    FreqAvg5to15(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [5,15]);
-    FreqAvg20to25(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [20,25]);
-    FreqAvg75to115(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [75,115]);
-    FreqAvg125to160(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [125,160]);
-    FreqAvg160to175(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [160,175]);
+% fprintf('Generating features\n');
+% for i = 1:numchannels
+%     TimeDomainAvg(:,i) = MovingWinFeats(x(:,i), fs, winLen, winDisp, TimeAvg);
+%     FreqAvg5to15(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [5,15]);
+%     FreqAvg20to25(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [20,25]);
+%     FreqAvg75to115(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [75,115]);
+%     FreqAvg125to160(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [125,160]);
+%     FreqAvg160to175(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [160,175]);
+% end
+% fprintf('Generating features done\n');
+% if dataflag == 1
+%     save('subject1_trainfeatures.mat','TimeDomainAvg','FreqAvg5to15','FreqAvg20to25',...
+%     'FreqAvg75to115','FreqAvg125to160','FreqAvg160to175');
+% elseif dataflag == 2
+%     save('subject2_trainfeatures.mat','TimeDomainAvg','FreqAvg5to15','FreqAvg20to25',...
+%     'FreqAvg75to115','FreqAvg125to160','FreqAvg160to175');
+% else
+%     save('subject3_trainfeatures.mat','TimeDomainAvg','FreqAvg5to15','FreqAvg20to25',...
+%     'FreqAvg75to115','FreqAvg125to160','FreqAvg160to175');
+% end
+if dataflag == 1
+    load('subject1_trainfeatures.mat');
+elseif dataflag == 2
+    load('subject2_trainfeatures.mat');
+else
+    load('subject3_trainfeatures.mat');
 end
-fprintf('Generating features done\n');
+
 %% Downsample dataglove
 
 if dataflag == 1
@@ -72,7 +90,8 @@ end
 % Construct X matrix
 M = numwindows;
 N = 3;
-X = zeros(M,N*numchannels*6+1);
+% X = zeros(M,N*numchannels*6+1);
+X = zeros(M,numchannels*6+1);
 % for i = 1:M-2
 %     X(i,:) = [1, reshape(TimeDomainAvg(i:i+N-1,1:numchannels),1,numchannels*N),...
 %         reshape(FreqAvg5to15(i:i+N-1,1:numchannels),1,numchannels*N),...
@@ -81,34 +100,52 @@ X = zeros(M,N*numchannels*6+1);
 %         reshape(FreqAvg125to160(i:i+N-1,1:numchannels),1,numchannels*N),...
 %         reshape(FreqAvg160to175(i:i+N-1,1:numchannels),1,numchannels*N)];
 % end
+% for i = 4:M
+%     X(i,:) = [1, reshape(TimeDomainAvg(i-N:i-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg5to15(i-N:i-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg20to25(i-N:i-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg75to115(i-N:i-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg125to160(i-N:i-1,1:numchannels),1,numchannels*N),...
+%         reshape(FreqAvg160to175(i-N:i-1,1:numchannels),1,numchannels*N)];
+% end
 for i = 4:M
-    X(i,:) = [1, reshape(TimeDomainAvg(i-N:i-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg5to15(i-N:i-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg20to25(i-N:i-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg75to115(i-N:i-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg125to160(i-N:i-1,1:numchannels),1,numchannels*N),...
-        reshape(FreqAvg160to175(i-N:i-1,1:numchannels),1,numchannels*N)];
-end
-
-Y = downsampled_glove_data(1:end-1,:);
-Beta = (X'*X)\(X'*Y);
-Y_hat = X*Beta;
-
-if dataflag == 1
-    save('subject1_BetaMatrix.mat','Beta');
-elseif dataflag == 2
-    save('subject2_BetaMatrix.mat','Beta');
-else
-    save('subject3_BetaMatrix.mat','Beta');
+    X(i,:) = [1, reshape(TimeDomainAvg(i-N,1:numchannels),1,numchannels),...
+        reshape(FreqAvg5to15(i-N,1:numchannels),1,numchannels),...
+        reshape(FreqAvg20to25(i-N,1:numchannels),1,numchannels),...
+        reshape(FreqAvg75to115(i-N,1:numchannels),1,numchannels),...
+        reshape(FreqAvg125to160(i-N,1:numchannels),1,numchannels),...
+        reshape(FreqAvg160to175(i-N,1:numchannels),1,numchannels)];
 end
 
 %% Lasso
 
 % Generate models
-% [B1, fitinfo] = lasso(X,Y(:,1));
-
+% fprintf('Performing lasso\n');
+% [B1, fitinfo] = lasso(X,Y(:,1),'NumLambda',5);
+% fprintf('Finger 1 done\n');
+% [B2, fitinfo] = lasso(X,Y(:,2),'NumLambda',5);
+% fprintf('Finger 2 done\n');
+% [B3, fitinfo] = lasso(X,Y(:,3),'NumLambda',5);
+% fprintf('Finger 3 done\n');
+% [B4, fitinfo] = lasso(X,Y(:,4),'NumLambda',5);
+% fprintf('Finger 4 done\n');
+% [B5, fitinfo] = lasso(X,Y(:,5),'NumLambda',5);
+% Beta = [B1(:,1),B2(:,1),B3(:,1),B4(:,1),B5(:,1)];
+% fprintf('Lasso done\n');
+% 
+% if dataflag == 1
+%     save('subject1_BetaMatrix.mat','Beta');
+% elseif dataflag == 2
+%     save('subject2_BetaMatrix.mat','Beta');
+% else
+%     save('subject3_BetaMatrix.mat','Beta');
+% end
 
 %% Spline Interpolation
+
+Y = downsampled_glove_data(1:end-1,:);
+Beta = (X'*X)\(X'*Y);
+Y_hat = X*Beta;
 
 predict_Y = zeros(310000,5);
 x = 1:50:309950;
