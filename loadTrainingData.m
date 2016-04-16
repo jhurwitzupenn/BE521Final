@@ -1,5 +1,6 @@
 function [ x ] = loadTrainingData( subjectID )
     load('subject_data.mat')
+    fprintf('Loading training data\n');
     if subjectID == 1
         x = subject1trainingData;
     elseif subjectID == 2
@@ -8,4 +9,3 @@ function [ x ] = loadTrainingData( subjectID )
         x = subject3trainingData;
     end
 end
-
