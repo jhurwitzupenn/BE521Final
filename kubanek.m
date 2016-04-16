@@ -6,7 +6,7 @@ subjectID = 1;
 
 trainingData = loadTrainingData(subjectID);
 gloveData = loadTrainingLabels(subjectID);
-numChannels = length(x(1,:));
+numChannels = length(trainingData(1,:));
 
 %% Pre-process data
 
