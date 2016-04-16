@@ -2,9 +2,8 @@
 warning('off','all');
 
 % Load dataset
-formatfolder = 'H:\Class Stuff\Brain-Computer Interface\Homework\ieeg-matlab-1.13.2';
-addpath(genpath(formatfolder));
-session = IEEGSession('I521_A0012_D001', 'Mernies', 'Mer_ieeglogin.bin');
+addpath(genpath('../ieeg-matlab-1.13.2/'));
+session = IEEGSession('I521_A0012_D001', 'jhurwitz', '../jhu_ieeglogin.bin');
 session.openDataSet('I521_A0012_D002');
 session.openDataSet('I521_A0012_D003');
 session.openDataSet('I521_A0013_D001');
