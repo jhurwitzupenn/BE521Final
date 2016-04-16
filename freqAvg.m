@@ -6,7 +6,7 @@ function output = freqAvg(input, freqrange, fs)
     
     % Perform fft
     L = length(input);
-    NFFT = 2^nextpow2(L);
+    NFFT = 2^10;
     input_fft = fft(input,NFFT);
     f = fs/2*linspace(0,1,NFFT/2+1);
     
@@ -14,4 +14,9 @@ function output = freqAvg(input, freqrange, fs)
     lower_idx = find(f >= freqrange(1),1);
     upper_idx = find(f <= freqrange(2),1,'last');
     output = mean(abs(input_fft(lower_idx:upper_idx)));
+    
+%     figure; plot(f,abs(input_fft(1:NFFT/2+1)),'b',f(lower_idx:upper_idx),...
+%         abs(input_fft(lower_idx:upper_idx)),'r');
+%     xlabel('frequency'); ylabel('FFT');
+    
 end

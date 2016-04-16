@@ -4,9 +4,9 @@
 %% Prefiltering
 
 % Set data flag to correspond to desired dataset
-dataflag = 1;
+% dataflag = 1;
 % dataflag = 2;
-% dataflag = 3;
+dataflag = 3;
 
 if dataflag == 1
     x = subject1trainingData;   % testing script with this data
@@ -40,6 +40,7 @@ FreqAvg125to160 = zeros(numwindows,numchannels);
 FreqAvg160to175 = zeros(numwindows,numchannels);
 
 % Extract features
+fprintf('Generating features\n');
 for i = 1:numchannels
     TimeDomainAvg(:,i) = MovingWinFeats(x(:,i), fs, winLen, winDisp, TimeAvg);
     FreqAvg5to15(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [5,15]);
@@ -48,7 +49,7 @@ for i = 1:numchannels
     FreqAvg125to160(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [125,160]);
     FreqAvg160to175(:,i) = MovingWinFeats_Freq(x(:,i), fs, winLen, winDisp, [160,175]);
 end
-
+fprintf('Generating features done\n');
 %% Downsample dataglove
 
 if dataflag == 1
