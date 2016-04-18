@@ -59,7 +59,7 @@ yPredict = splineInterpolation(yHat, 310000);
 
 %% Evaluate Model
 
-accuracy = evaluateModel(yPredict, gloveData)
+correlations = evaluateModel(yPredict, gloveData)
 
 %% Save Beta Matrix
 

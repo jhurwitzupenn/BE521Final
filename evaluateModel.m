@@ -1,6 +1,8 @@
-function [ accuracy ] = evaluateModel( yPredict, gloveData )
+function [ correlations ] = evaluateModel( yPredict, gloveData )
     % need to check predict_Y
-    numCorrect = sum(yPredict == gloveData);
-    accuracy = numCorrect / length(yPredict);
+    correlations = zeros(1, 5);
+    for i = 1:5
+        correlations(i) = corr(yPredict(:, i), gloveData(:, i));
+    end
 end
 
