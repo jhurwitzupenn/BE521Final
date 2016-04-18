@@ -1,8 +1,8 @@
 %% Load data
 % Set data flag to correspond to desired dataset
-subjectID = 1;
+% subjectID = 1;
 % subjectID = 2;
-% subjectID = 3;
+subjectID = 3;
 
 trainingData = loadTrainingData(subjectID);
 gloveData = loadTrainingLabels(subjectID);
@@ -10,7 +10,7 @@ numChannels = length(trainingData(1,:));
 
 %% Pre-process data
 
-preProcessedData = preProcess(trainingData, numChannels);
+% preProcessedData = preProcess(trainingData, numChannels);
 
 %% Feature Extraction
 % Define window length/displacement
@@ -24,7 +24,13 @@ X = BuildFeatures(trainingData, fs, winLen, winDisp, numChannels);
 
 downSampleFactor = winDisp * 1000;
 Y = downSample(gloveData, downSampleFactor);
-Y = Y(1:end-1,:);
+Y = Y(5:end,:);
+
+%% Logistic Regression
+
+% Classify into 1 of 2 states (SVM?)
+% classifier_model_cell = logRegression(X,Y);
+% saveClassifier(classifier_model_cell,subjectID);
 
 %% Lasso
 
@@ -59,6 +65,7 @@ yPredict = splineInterpolation(yHat, 310000);
 
 %% Evaluate Model
 
+fprintf('Subject %d\n',subjectID);
 correlations = evaluateModel(yPredict, gloveData)
 
 %% Save Beta Matrix

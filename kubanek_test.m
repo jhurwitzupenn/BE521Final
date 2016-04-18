@@ -1,8 +1,8 @@
 %% Load data
 % Set data flag to correspond to desired dataset
-subjectID = 1;
+% subjectID = 1;
 % subjectID = 2;
-% subjectID = 3;
+subjectID = 3;
 
 testingData = loadTestingData(subjectID);
 Beta_matrix = loadBetaMatrix(subjectID);
@@ -10,7 +10,7 @@ numChannels = length(testingData(1,:));
 
 %% Pre-process data
 
-preProcessedData = preProcess(trainingData, numChannels);
+% preProcessedData = preProcess(testingData, numChannels);
 
 %% Feature Extraction
 % Define window length/displacement
