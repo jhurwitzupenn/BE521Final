@@ -15,7 +15,8 @@ function [ X ] = BuildFeatures( data, fs, winLen, winDisp, numChannels )
     f = 1:175;
     for i = 1:numChannels
         TimeDomainAvg(:,i) = MovingWinFeats(data(:,i), fs, winLen, winDisp, TimeAvg);
-        [s,f,~] = spectrogram(data(:,i),100,50,f,1000);
+        [s,f,~] = spectrogram(data(:,i),winLen*1e3,round((winLen-winDisp)*1e3)...
+            ,f,fs);
         
         FreqAvg5to15(:,i) = mean(abs(s(5:15,:)))';
         FreqAvg20to25(:,i) = mean(abs(s(20:25,:)))';

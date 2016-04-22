@@ -21,6 +21,7 @@ end
 %% Feature Extraction
 % Define window length/displacement
 fs = 1000;
+% winLen = 200e-3;    % 200 ms
 winLen = 100e-3;    % 100 ms
 winDisp = 50e-3;    % 50 ms
 
@@ -33,6 +34,7 @@ X = BuildFeatures(preProcessedData, fs, winLen, winDisp, numChannels);
 downSampleFactor = winDisp * 1000;
 Y = downSample(gloveData, downSampleFactor);
 Y = Y(5:end,:);
+% Y = Y(7:end,:);
 
 %% SVM
 % addpath('libsvmmatlab');
@@ -75,7 +77,17 @@ Y = Y(5:end,:);
 % Linear Regression
 Beta = (X' * X) \ (X' * Y);
 yHat =  X * Beta;
-yPredict = splineInterpolation(yHat, 310000);
+yPredict = splineInterpolation(yHat, 310000, winDisp);
+
+% Smooth out low amplitude oscillations
+threshold = 0.6;
+yPredict2 = yPredict;
+for i = 1:5
+    curr_finger = yPredict(:,i);
+    smoothed_y = smooth(curr_finger,1001);
+    idx = find(curr_finger < threshold);
+    yPredict2(idx,i) = smoothed_y(idx);
+end
 
 % Logistic Regression Probabilities
 % model = loadClassifier(subjectID);
@@ -106,7 +118,7 @@ yPredict = splineInterpolation(yHat, 310000);
 
 fprintf('Subject %d\n',subjectID);
 correlations = evaluateModel(yPredict, gloveData)
-% correlations_classified = evaluateModel(yPredict2, gloveData)
+correlations_classified = evaluateModel(yPredict2, gloveData)
 
 %% Save Beta Matrix
 
