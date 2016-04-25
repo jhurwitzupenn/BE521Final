@@ -1,10 +1,6 @@
 function kubanek_test(subjectID,CARflag)
-%% Load data
-% Set data flag to correspond to desired dataset
-% subjectID = 1;
-% subjectID = 2;
-% subjectID = 3;
 
+%% Load data
 testingData = loadTestingData(subjectID);
 Beta_matrix = loadBetaMatrix(subjectID);
 numChannels = length(testingData(1,:));
@@ -21,7 +17,6 @@ end
 %% Feature Extraction
 % Define window length/displacement
 fs = 1000;
-% winLen = 200e-3;    % 200 ms
 winLen = 100e-3;    % 100 ms
 winDisp = 50e-3;    % 50 ms
 
@@ -42,13 +37,6 @@ for i = 1:5
     idx = find(curr_finger < threshold);
     yPredict2(idx,i) = smoothed_y(idx);
 end
-
-% Zero out low threshold
-% for i = 1:5
-%     temp = yPredict(:,i);
-%     temp(abs(temp)<1) = 0;
-%     yPredict(:,i) = temp;
-% end
 
 % savePredictions(yPredict, subjectID);
 savePredictions(yPredict2, subjectID);

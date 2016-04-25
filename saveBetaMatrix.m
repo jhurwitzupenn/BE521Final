@@ -1,4 +1,4 @@
-function saveBetaMatrix( Beta, subjectID)
+function saveBetaMatrix(Beta, subjectID)
     if subjectID == 1
         save('subject1_BetaMatrix.mat','Beta');
     elseif subjectID == 2

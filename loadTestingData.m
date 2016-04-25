@@ -1,5 +1,4 @@
 function [ x ] = loadTestingData( subjectID )
-    fprintf('Loading testing data\n');
     if subjectID == 1
         load('subject_data.mat','subject1testingData');
         x = subject1testingData;

@@ -1,5 +1,4 @@
 function [ y ] = loadTrainingLabels( subjectID )
-    fprintf('Loading training labels\n');
     if subjectID == 1
         load('subject_data.mat','subject1gloveData');
         y = subject1gloveData;
