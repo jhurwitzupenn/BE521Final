@@ -10,10 +10,14 @@ function [ X ] = BuildFeatures( data, fs, winLen, winDisp, numChannels )
     FreqAvg75to115 = zeros(numWins, numChannels);
     FreqAvg125to160 = zeros(numWins, numChannels);
     FreqAvg160to175 = zeros(numWins, numChannels);
+    
+    VarAvg = @(x) var(x);
+    VarianceAvg = zeros(numWins, numChannels);
 
     f = 1:175;
     for i = 1:numChannels
         TimeDomainAvg(:,i) = MovingWinFeats(data(:,i), fs, winLen, winDisp, TimeAvg);
+        VarianceAvg(:,i) = MovingWinFeats(data(:,i), fs, winLen, winDisp, VarAvg);
         [s,f,~] = spectrogram(data(:,i),winLen*1e3,round((winLen-winDisp)*1e3)...
             ,f,fs);
         
@@ -25,14 +29,15 @@ function [ X ] = BuildFeatures( data, fs, winLen, winDisp, numChannels )
     end
     
     delay = 3;
-    X = zeros(numWins,numChannels*6*delay+1);
+    X = zeros(numWins,numChannels*7*delay+1);
     for i = 4:numWins
         X(i,:) = [1, reshape(TimeDomainAvg(i-delay:i-1,1:numChannels),1,numChannels*delay),...
             reshape(FreqAvg5to15(i-delay:i-1,1:numChannels),1,numChannels*delay),...
             reshape(FreqAvg20to25(i-delay:i-1,1:numChannels),1,numChannels*delay),...
             reshape(FreqAvg75to115(i-delay:i-1,1:numChannels),1,numChannels*delay),...
             reshape(FreqAvg125to160(i-delay:i-1,1:numChannels),1,numChannels*delay),...
-            reshape(FreqAvg160to175(i-delay:i-1,1:numChannels),1,numChannels*delay)];
+            reshape(FreqAvg160to175(i-delay:i-1,1:numChannels),1,numChannels*delay),...
+            reshape(VarianceAvg(i-delay:i-1,1:numChannels),1,numChannels*delay)];
     end
     
     % Remove first 3 rows of zeros
