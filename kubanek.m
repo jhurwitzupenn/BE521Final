@@ -1,10 +1,11 @@
 function kubanek(subjectID, CARflag, changeFeatures, changeLabels, visualizePredictions)
+
 % Define window length/displacement
 fs = 1000;
 winLen = 100e-3;    % 100 ms
 winDisp = 50e-3;    % 50 ms
 if changeFeatures == 1
-    fprintf('REQUESTED REBUILD OF FEATURES\n');
+    fprintf('REQUESTED REBUILD OF TRAINING FEATURES\n');
     %% Load data
     fprintf('Loading training data\n');
     trainingData = loadTrainingData(subjectID);
@@ -39,7 +40,7 @@ if changeLabels == 1
     downSampleFactor = winDisp * 1000;
     fprintf('Downsampling labels\n');
     Y = downSample(gloveData, downSampleFactor);
-    Y = Y(5:end,:);
+    Y = round(Y(5:end,:));
     
     % Cache the labels
     fprintf('Saving Labels\n');
@@ -60,13 +61,15 @@ catch
     error('Label file not found');
 end
 
+%%
+
 % Linear Regression
 Beta = (X' * X) \ (X' * Y);
 yHat =  X * Beta;
 yPredict = splineInterpolation(yHat, 310000, winDisp);
 
 % Smooth out low amplitude oscillations
-threshold = 0.6;
+threshold = 1.0;
 yPredict2 = yPredict;
 for i = 1:5
     curr_finger = yPredict(:,i);
@@ -74,7 +77,6 @@ for i = 1:5
     idx = find(curr_finger < threshold);
     yPredict2(idx,i) = smoothed_y(idx);
 end
-
 
 %% Evaluate Model
 
