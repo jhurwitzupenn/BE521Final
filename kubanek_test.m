@@ -58,5 +58,28 @@ for i = 1:5
     yPredict2(idx,i) = smoothed_y(idx);
 end
 
-savePredictions(yPredict2, subjectID);
+% Log Regression
+if subjectID == 1
+    load('classifier_logreg_1.mat');
+    B = B1;
+elseif subjectID == 2
+    load('classifier_logreg_2.mat');
+    B = B2;
+else
+    load('classifier_logreg_3.mat');
+    B = B3;
+end
+
+probs = zeros(size(X,1),5);
+for i = 1:5
+    p_mat = mnrval(B(:,i),X(:,2:end));
+    probs(:,i) = p_mat(:,2);    % Store probability that it's 1
+    fprintf('Fitted finger %i\n',i);
+end
+
+yLogLinReg = yHat .* probs;
+yPredict_Log_Linear = splineInterpolation(yLogLinReg, 147500,winDisp);
+
+% savePredictions(yPredict2, subjectID);
+savePredictions(yPredict_Log_Linear, subjectID);
 end
