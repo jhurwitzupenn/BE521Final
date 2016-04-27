@@ -46,7 +46,6 @@ catch
 end
 
 yHat = X*Beta_matrix;
-yPredict = splineInterpolation(yHat, 147500, winDisp);
 
 % Smooth out low amplitude oscillations
 threshold = 1.0;
@@ -59,23 +58,7 @@ for i = 1:5
 end
 
 % Log Regression
-if subjectID == 1
-    load('classifier_logreg_1.mat');
-    B = B1;
-elseif subjectID == 2
-    load('classifier_logreg_2.mat');
-    B = B2;
-else
-    load('classifier_logreg_3.mat');
-    B = B3;
-end
-
-probs = zeros(size(X,1),5);
-for i = 1:5
-    p_mat = mnrval(B(:,i),X(:,2:end));
-    probs(:,i) = p_mat(:,2);    % Store probability that it's 1
-    fprintf('Fitted finger %i\n',i);
-end
+probs = logReg(X,subjectID);
 
 yLogLinReg = yHat .* probs;
 yPredict_Log_Linear = splineInterpolation(yLogLinReg, 147500,winDisp);

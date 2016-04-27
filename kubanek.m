@@ -61,56 +61,19 @@ catch
     error('Label file not found');
 end
 
-%% SVM classification
-% addpath('libsvmmatlab');
-
-% Classify into 1 of 2 states
-% classifier_model_cell = svmProbs(X,Y);
-% saveClassifier(classifier_model_cell,subjectID);
-
-% if subjectID == 1
-%     struct_model = load('classifier_SVM_1.mat');
-% elseif subjectID == 2
-%     struct_model = load('classifier_SVM_2.mat');
-% else
-%     struct_model = load('classifier_SVM_3.mat');
-% end
-% 
-% prob_fingers = zeros(size(Y));
-% for i = 1:5
-%     [predicted_label, accuracy, probs] = svmpredict(Y(:,i),...
-%         X, struct_model.model_cell{i}, '-b 1');
-%     prob_fingers(:,i) = probs(:,2);
-% end
 
 %%
 
 % Linear Regression
 Beta = (X' * X) \ (X' * Y);
 yHat =  X * Beta;
-yPredict = splineInterpolation(yHat, 310000, winDisp);
 
 % Log Regression
-if subjectID == 1
-    load('classifier_logreg_1.mat');
-    B = B1;
-elseif subjectID == 2
-    load('classifier_logreg_2.mat');
-    B = B2;
-else
-    load('classifier_logreg_3.mat');
-    B = B3;
-end
-
-probs = zeros(size(X,1),5);
-for i = 1:5
-    p_mat = mnrval(B(:,i),X(:,2:end));
-    probs(:,i) = p_mat(:,2);    % Store probability that it's 1
-    fprintf('Fitted finger %i\n',i);
-end
-
+probs = logReg(X,subjectID);
 yLogLinReg = yHat .* probs;
-yPredict_Log_Linear = splineInterpolation(yLogLinReg, 310000,winDisp);
+
+% Combine both
+yPredict = splineInterpolation(yLogLinReg, 310000,winDisp);
 
 % Smooth out low amplitude oscillations
 threshold = 1.0;
@@ -127,7 +90,7 @@ end
 fprintf('Subject %d\n',subjectID);
 correlations = evaluateModel(yPredict, gloveData)
 correlations_postProcessedFeatures = evaluateModel(yPredict2, gloveData)
-correlation_logreg = evaluateModel(yPredict_Log_Linear, gloveData)
+% correlation_logreg = evaluateModel(yPredict_Log_Linear, gloveData)
 
 %% Save Beta Matrix
 
@@ -141,7 +104,7 @@ if visualizePredictions == 1
         plot(samplevector,gloveData(:,i),'b',...
             samplevector,yPredict(:,i),'r',...
             samplevector,yPredict2(:,i),'k');
-        legend('Glove data','Predicted','Smoothed Predicted');
+        legend('Glove data','Linear-log Predicted','Smoothed Predicted');
         xlabel('Sample'); ylabel('Output'); grid on;
         title(sprintf('Subject %i, Finger %i',subjectID,i));
     end
