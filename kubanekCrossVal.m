@@ -1,28 +1,28 @@
-function [correlations, correlations_classified]= kubanekCrossVal(subjectID, k, CARflag)
+function [corr_trains, corr_tests]= kubanekCrossVal(subjectID, k)
 %% kfold cross validation on the kubanek model uses 'kubanekmodel.m'
+try
+    X = loadFeatures(subjectID);
+catch
+    error('Label file not found');
+end
+try
+    Y = loadLabels(subjectID);
+catch
+    error('Label file not found');
+end
 
-trainingData = loadTrainingData(subjectID);
-gloveData = loadTrainingLabels(subjectID);
-trainingDataSize = size(trainingData)
+indices = crossvalind('Kfold',length(Y(:,1)),k);
+corr_trains = zeros(k, 5);
+corr_tests = zeros(k, 5);
 
-% gloveData = gloveData';
-gloveDataSize = size(gloveData)
-
-numChannels = length(trainingData(1,:))
-
-indices = crossvalind('Kfold',310000,10);
-% cp = classperf(gloveData(1, :));
-correlations = zeros(k, 5);
-correlations_classified = zeros(k, 5);
     for i=1:k
-        i
+%         fprintf('Fold %i\n',i);
         test = (indices == i); 
         train = ~test;
-        trainingData_i = trainingData(train', :);
-        gloveData_i = gloveData(train', :);
-        [c, cc] = kubanekModel(trainingData_i, gloveData_i,CARflag )
-        correlations(i, :) = c;
-        correlations_calssified(i, :) = cc;
+        [ctrain, ctest] = kubanekModel(test, train,X,Y);
+        corr_trains(i, :) = ctrain;
+        corr_tests(i, :) = ctest;
     end
-    
+avg_corr_train = mean(corr_trains)
+avg_corr_test = mean(corr_tests)
 end
